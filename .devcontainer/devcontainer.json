@@ -1,0 +1,10 @@
+{
+  "name": "Python IO",
+  // Dockerfileでイメージ・コンテナを作成
+  "dockerFile": "../Dockerfile",
+  // リモート先のVS Codeにインストールする拡張機能
+  "extensions": [
+    "ms-python.python",
+    "njpwerner.autodocstring"
+  ],
+}
