@@ -6,40 +6,44 @@ from datetime import datetime
 from functools import reduce
 
 import openpyxl
+from openpyxl import Workbook
 
-header_keys = ['date', 'market', 'type', 'price', 'amount', 'total', 'fee', 'fee_coin']
-time_regarded_as_same = 15 * 60 # 取りまとめ対象とみなす時間差(秒単位想定)
-max_row = 1000 # 最大処理行数
+HEADER_KEYS = ['date', 'market', 'type', 'price', 'amount', 'total', 'fee', 'fee_coin']
+TIME_REGARDED_AS_SAME = 15 * 60 # 取りまとめ対象とみなす時間差(秒単位想定)
+MAX_ROW = 1000 # 最大処理行数
+# INPUT_URL = "/root/file" # コンテナ環境上の入力パス
+INPUT_URL = "/workspaces/python-file-io/input" # devcontainer上の入力パス
+OUTPUT_URL = "/workspaces/python-file-io/output" # devcontainer上のパス
 
 """
 メインロジック
 """
 def main():
-  # base_url = "/root/file" # コンテナ環境上のパス
-  base_url = "/workspaces/python-file-io/sample-files" # devcontainer上のパス
-  files = glob.glob(f"{base_url}/*")
+  files = glob.glob(f"{INPUT_URL}/*")
   for file_path in files:
     file_name = os.path.basename(file_path)
-    wb = openpyxl.load_workbook(f"{base_url}/{file_name}")
-    default_sheet = wb['sheet1']
+    read_wb = openpyxl.load_workbook(f"{INPUT_URL}/{file_name}", read_only=True)
+    read_ws = read_wb['sheet1']
+    if os.path.isfile(f"{OUTPUT_URL}/{file_name}"):
+      os.remove(f"{OUTPUT_URL}/{file_name}")
+    write_wb = Workbook()
+    if 'Sheet' in write_wb.sheetnames:
+      write_wb.remove(write_wb['Sheet']) # デフォルトのシートを削除
+    write_ws = write_wb.create_sheet('sheet1')
 
-    if 'tmp' in wb.sheetnames:
-      wb.remove(wb['tmp'])
-    target_sheet = wb.create_sheet(title="tmp")
-
-    initSheet(target_sheet)
+    initSheet(write_ws)
 
     row = 2 # 参照行のindex
     wrire_row = 2 # 対象シートの書き込み対象行のindex
     stocks_row: list = [] # 書き込み保留行
     while True:
-      row_i = getBinanceRowData(row, default_sheet)
-      row_ii = getBinanceRowData(row+1, default_sheet)
+      row_i = getBinanceRowData(row, read_ws)
+      row_ii = getBinanceRowData(row+1, read_ws)
       if row_i == None:
         break
       elif row_ii == None:
         # (最終行想定)
-        writeRow(wrire_row, target_sheet, row_i)
+        writeRow(wrire_row, write_ws, row_i)
         break
 
       # 行をストック
@@ -52,31 +56,41 @@ def main():
         group: dict[str, list] = {}
         result: dict[str, any] = {}
         # グループの各keyに各行の値をlistとしてまとめる(処理がわかりやすくなるように)
-        for key in header_keys:
+        for key in HEADER_KEYS:
           group[key] = []
         for stock in stocks_row:
-          for key in header_keys:
+          for key in HEADER_KEYS:
             group[key].append(stock[key])
 
         if len(group["date"]) == 1:
-          for v in header_keys:
+          for v in HEADER_KEYS:
             result[v] = group[v][0]
-          writeRow(wrire_row, target_sheet, result)
+          writeRow(wrire_row, write_ws, result)
           stocks_row = []
           wrire_row=wrire_row+1
         else:
           # 1行にまとめる
           result = roundUpIntoRow(group)
-          writeRow(wrire_row, target_sheet, result)
+          writeRow(wrire_row, write_ws, result)
           stocks_row = []
           wrire_row=wrire_row+1
       row=row+1
-      if row > max_row:
+      if row > MAX_ROW:
         break
       # END_行単位のループ
 
-    wb.save(f"{base_url}/{file_name}")
-    wb.close()
+    # 保存先ディレクトリの存在チェック
+    if not os.path.isdir(OUTPUT_URL):
+      os.mkdir(OUTPUT_URL, mode=0o777)
+
+    # 空の行の削除
+    last_row = write_ws.max_row + 1 #シートの最終行
+    for i in reversed(range(1, last_row)):
+      if write_ws.cell(row=i, column=1).value == None:
+        write_wb.delete_rows(i)
+
+    write_wb.save(f"{OUTPUT_URL}/{file_name}")
+    write_wb.close()
     # END_workbook単位のループ
 
 """
@@ -96,7 +110,7 @@ def getBinanceRowData(row, sheet):
   if date_str == None:
     return None
   data = {}
-  for i, v in enumerate(header_keys):
+  for i, v in enumerate(HEADER_KEYS):
     if i == 0:
       data[v] = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
       continue
@@ -118,7 +132,7 @@ def writeRow(row: int, sheet, row_data: dict):
 """
 def isRegardedAsSame(row_1, row_2)->bool:
   delta_seconds = (row_1["date"]-row_2["date"]).total_seconds()
-  return delta_seconds < time_regarded_as_same and row_1["market"] == row_2["market"] and row_1["type"] == row_2["type"]
+  return delta_seconds < TIME_REGARDED_AS_SAME and row_1["market"] == row_2["market"] and row_1["type"] == row_2["type"]
 
 """
 複数行を1行にまとめる
