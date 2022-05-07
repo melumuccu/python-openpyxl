@@ -25,6 +25,23 @@
 | docker-compose    | 1.29.2     |                                                                              |
 | Remote Containers | 0.234.0    | VScode 拡張。コンテナ内で VScode を動作させる(?)。デバッグなどの目的で導入。 |
 
+## 使い方
+
+1. /input に操作対象の Excel ファイル(Binance 取引所の取引履歴ファイル)を配置
+   - docker-compose.yml でマウントしている
+1. Remote Development(ms-vscode-remote.vscode-remote-extensionpack) を VScode にインストール
+1. Remote Development でコンテナに入る
+   - ![VScode右下の「><」マークをクリック](resource/pic/RemoteDevelopment_1.png)
+   ***
+   - ![Open Folder in Container... をクリック](resource/pic/RemoteDevelopment_2.png)
+   ***
+   - ![.devcontainer があるディレクトリを選択し、Openをクリック](resource/pic/RemoteDevelopment_3.png)
+1. sample.py を開き実行することで/output に出力される
+
+- MEMO
+  - 複数ファイルに対応している
+  - 同名のファイルが既に/output に存在する場合は上書きされる(delete&create)
+
 ## 解決したかった問題と対処まで
 
 ### 問題: 仮想通貨の取引記録が複数に分裂することが多々起こる
