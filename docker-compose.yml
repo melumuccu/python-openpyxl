@@ -4,9 +4,9 @@ services:
     restart: always
     build: .
     container_name: "python3"
-    working_dir: "/root/"
+    working_dir: "/root/src"
     # env_file: ./.variables.env
     tty: true
     volumes:
-      - ./opt:/root/opt
-      - ./sample-files:/root/file
+      - ./src:/root/src
+      - ./input:/root/input

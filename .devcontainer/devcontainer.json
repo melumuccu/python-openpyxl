@@ -1,7 +1,7 @@
 {
   "name": "Python IO",
-  // Dockerfileでイメージ・コンテナを作成
-  "dockerFile": "../Dockerfile",
+  // docker-composeでイメージ・コンテナを作成
+  "dockerFile": "../docker-compose.yml",
   // リモート先のVS Codeにインストールする拡張機能
   "extensions": [
     "ms-python.python",
