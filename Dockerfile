@@ -15,3 +15,7 @@ RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools
 
 RUN python -m pip install openpyxl
+
+WORKDIR /root/src
+
+ENTRYPOINT ["/bin/bash", "-c", "python sample.py"]

@@ -11,9 +11,9 @@ from openpyxl import Workbook
 HEADER_KEYS = ['date', 'market', 'type', 'price', 'amount', 'total', 'fee', 'fee_coin']
 TIME_REGARDED_AS_SAME = 15 * 60 # 取りまとめ対象とみなす時間差(秒単位想定)
 MAX_ROW = 1000 # 最大処理行数
-# INPUT_URL = "/root/file" # コンテナ環境上の入力パス
-INPUT_URL = "/workspaces/python-file-io/input" # devcontainer上の入力パス
-OUTPUT_URL = "/workspaces/python-file-io/output" # devcontainer上のパス
+IS_DEVCONTAINER = os.getcwd() == '/workspaces/python-file-io'
+INPUT_URL =  './input' if IS_DEVCONTAINER else '../input' # 入力パス(devcontainerで実行時 <=> コンテナ内で実行時)
+OUTPUT_URL = "./output" if IS_DEVCONTAINER else '../output' # 出力パス(devcontainerで実行時 <=> コンテナ内で実行時)
 
 """
 メインロジック

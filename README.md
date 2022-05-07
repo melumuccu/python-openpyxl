@@ -27,8 +27,34 @@
 
 ## 使い方
 
+- 複数ファイルに対応している
+- 同名のファイルが既に/output に存在する場合は上書きされる(delete&create)
+- /output に処理完了後の Exele ファイルが出力される
+
+### 処理実行
+
+- コンテナを起動し、一度だけ処理を走らせ、コンテナを破棄する
+
 1. /input に操作対象の Excel ファイル(Binance 取引所の取引履歴ファイル)を配置
-   - docker-compose.yml でマウントしている
+1. clone したディレクトリに移動
+1. image をビルドする
+   `$ docker build --tag py-file-io .`
+1. image 一覧を表示し、py-file-io の ID をコピー
+   `$ docker images`
+1. コンテナ起動=>処理実行=>コンテナ破棄
+
+```
+$ docker run -it --rm \
+-v $(pwd)/src:/root/src \
+-v $(pwd)/input:/root/input \
+-v $(pwd)/output:/root/output \
+[py-file-ioのimage ID]
+```
+
+### 開発
+
+- ソースをいじり、任意のタイミングで実行したい場合
+
 1. Remote Development(ms-vscode-remote.vscode-remote-extensionpack) を VScode にインストール
 1. Remote Development でコンテナに入る
    - ![VScode右下の「><」マークをクリック](resource/pic/RemoteDevelopment_1.png)
@@ -36,11 +62,7 @@
    - ![Open Folder in Container... をクリック](resource/pic/RemoteDevelopment_2.png)
    ***
    - ![.devcontainer があるディレクトリを選択し、Openをクリック](resource/pic/RemoteDevelopment_3.png)
-1. sample.py を開き実行することで/output に出力される
-
-- MEMO
-  - 複数ファイルに対応している
-  - 同名のファイルが既に/output に存在する場合は上書きされる(delete&create)
+1. sample.py を開き VScode から実行する
 
 ## 解決したかった問題と対処まで
 
@@ -81,3 +103,10 @@
     - 複数の PJ を兼任することが多いので、PJ を切り替えるたびに拡張機能や設定を意識するのが面倒だった
       - 特に Formatter の設定有無は PJ によってまちまちで、切り替えを忘れると保存時にコードの体裁がごっそり変わってしまったりして面倒に感じていた
     - **設定ファイルを git 管理しておけば各メンバーの拡張機能 や VScode 設定を統一することができる**のでテキストベースで設定のいじり方や導入すべき拡張機能などを書かなくてよくなりそう(今まで頑張って書いてきたが、今後はこの方法で不要にしたい。)
+
+### 問題: いちいちコンテナを起動してコンテナ内で実行、コンテナの破棄をしたくない
+
+#### 対処: Dockerfile と起動時のコマンドを工夫して対応
+
+- Dockerfile に ENTRYPOINT を設定することで run 時にコマンドを動作させる
+- run 時に --rm オプションをつけることで ENTRYPOINT のコマンド終了と共にコンテナを破棄させる

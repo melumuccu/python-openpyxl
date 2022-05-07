@@ -1,10 +1,16 @@
 {
   "name": "Python IO",
-  // docker-composeでイメージ・コンテナを作成
-  "dockerFile": "../docker-compose.yml",
+  // Dockerfileでイメージ・コンテナを作成
+  "dockerFile": "../Dockerfile",
   // リモート先のVS Codeにインストールする拡張機能
   "extensions": [
+    // Python系
     "ms-python.python",
-    "njpwerner.autodocstring"
+    "ms-python.vscode-pylance",
+    "kevinrose.vsc-python-indent",
+    "dongli.python-preview",
+    "njpwerner.autodocstring",
+    // その他Util
+    "nemesv.copy-file-name"
   ],
 }
