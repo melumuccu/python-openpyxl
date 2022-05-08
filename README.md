@@ -2,6 +2,8 @@
 
 ## 概要
 
+![デモンストレーション](resource/gif/demo.gif)
+
 - Python を用いてファイルの入出力
   - Binance 取引所での仮想通貨の取引記録を Excel ファイルとして export できるので、ここではその Excel ファイルを扱った
 - 処理内容
