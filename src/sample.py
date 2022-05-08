@@ -20,6 +20,7 @@ OUTPUT_URL = "./output" if IS_DEVCONTAINER else '../output' # 出力パス(devco
 """
 def main():
   files = glob.glob(f"{INPUT_URL}/*")
+  # START_workbook単位のループ
   for file_path in files:
     file_name = os.path.basename(file_path)
     read_wb = openpyxl.load_workbook(f"{INPUT_URL}/{file_name}", read_only=True)
@@ -36,6 +37,7 @@ def main():
     row = 2 # 参照行のindex
     wrire_row = 2 # 対象シートの書き込み対象行のindex
     stocks_row: list = [] # 書き込み保留行
+    # START_行単位のループ
     while True:
       row_i = getBinanceRowData(row, read_ws)
       row_ii = getBinanceRowData(row+1, read_ws)
@@ -43,37 +45,18 @@ def main():
         break
       elif row_ii == None:
         # (最終行想定)
-        writeRow(wrire_row, write_ws, row_i)
+        stocks_row.append(row_i) # 行をストック
+        result = summarizeStocks(stocks_row) # ストックした行を1行にまとめる
+        writeRow(wrire_row, write_ws, result)
         break
 
-      # 行をストック
-      stocks_row.append(row_i)
+      stocks_row.append(row_i) # 行をストック
 
       if not isRegardedAsSame(row_i, row_ii):
-        '''============================================
-        ここまでストックした行を1行にまとめて書き込みを行う
-        ============================================'''
-        group: dict[str, list] = {}
-        result: dict[str, any] = {}
-        # グループの各keyに各行の値をlistとしてまとめる(処理がわかりやすくなるように)
-        for key in HEADER_KEYS:
-          group[key] = []
-        for stock in stocks_row:
-          for key in HEADER_KEYS:
-            group[key].append(stock[key])
-
-        if len(group["date"]) == 1:
-          for v in HEADER_KEYS:
-            result[v] = group[v][0]
-          writeRow(wrire_row, write_ws, result)
-          stocks_row = []
-          wrire_row=wrire_row+1
-        else:
-          # 1行にまとめる
-          result = roundUpIntoRow(group)
-          writeRow(wrire_row, write_ws, result)
-          stocks_row = []
-          wrire_row=wrire_row+1
+        result = summarizeStocks(stocks_row) # ストックした行を1行にまとめる
+        writeRow(wrire_row, write_ws, result)
+        stocks_row = []
+        wrire_row=wrire_row+1
       row=row+1
       if row > MAX_ROW:
         break
@@ -147,6 +130,28 @@ def roundUpIntoRow(data: dict)->dict:
   result["total"] = str( reduce(lambda a, b: float(a) + float(b), data["total"]) ) # 合計金額
   result["fee"] = str( reduce(lambda a, b: float(a) + float(b), data["fee"]) ) # 合計手数料
   result["fee_coin"] = data["fee_coin"][0] # 手数料通貨
+  return result
+
+"""
+ストックした行を1行にまとめる
+"""
+def summarizeStocks(stocks_row: list)->dict:
+  group: dict[str, list] = {}
+  result: dict[str, any] = {}
+  # グループの各keyに各行の値をlistとしてまとめる(処理がわかりやすくなるように)
+  for key in HEADER_KEYS:
+    group[key] = []
+  for stock in stocks_row:
+    for key in HEADER_KEYS:
+      group[key].append(stock[key])
+
+  if len(group["date"]) == 1:
+    for v in HEADER_KEYS:
+      result[v] = group[v][0]
+  else:
+    # 1行にまとめる
+    result = roundUpIntoRow(group)
+
   return result
 
 
