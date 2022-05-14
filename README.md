@@ -39,7 +39,6 @@
 
 - コンテナを起動し、一度だけ処理を走らせ、コンテナを破棄する
 
-1. /input に操作対象の Excel ファイル(Binance 取引所の取引履歴ファイル)を配置
 1. clone したディレクトリに移動
 1. image をビルドする
    `$ docker build --tag py-file-io .`
@@ -54,6 +53,9 @@ $ docker run -it --rm \
 -v $(pwd)/output:/root/output \
 [py-file-ioのimage ID]
 ```
+
+- 結果
+  - input/sample.xlsx のファイルを処理して /output/sample.xlsx が生成される
 
 ### 開発
 

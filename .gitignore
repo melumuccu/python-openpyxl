@@ -1,4 +1,5 @@
 .variables.env
 .DS_Store
 output
-input
+input/*
+!/input/sample.xlsx
