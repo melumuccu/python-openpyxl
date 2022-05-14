@@ -26,7 +26,6 @@
 | Python            | 3.10.4     |                                                                              |
 | OpenPyXL          | 3.0.9      | Excel ファイルを Python で扱うためのパッケージ                               |
 | Docker            | 20.10.11   |                                                                              |
-| docker-compose    | 1.29.2     |                                                                              |
 | Remote Containers | 0.234.0    | VScode 拡張。コンテナ内で VScode を動作させる(?)。デバッグなどの目的で導入。 |
 
 ## 使い方
