@@ -11,6 +11,11 @@
     "dongli.python-preview",
     "njpwerner.autodocstring",
     // その他Util
-    "nemesv.copy-file-name"
-  ],
+    "nemesv.copy-file-name",
+    "oderwat.indent-rainbow",
+    "mhutchie.git-graph",
+    "donjayamanne.githistory",
+    "eamodio.gitlens",
+    "wayou.vscode-todo-highlight"
+  ]
 }
