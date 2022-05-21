@@ -14,7 +14,8 @@ RUN apt-get install -y vim less
 RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools
 
-RUN python -m pip install openpyxl
+# black: Formatter
+RUN python -m pip install openpyxl black
 
 WORKDIR /root/src
 
